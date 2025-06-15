@@ -1,0 +1,20 @@
+FROM node:18-alpine
+
+WORKDIR /app
+
+COPY package*.json ./
+
+RUN npm install
+
+COPY ../prisma ./prisma
+COPY ../process-service ./process-service
+
+WORKDIR /app/process-service
+
+RUN npx prisma generate --schema=../prisma/schema.prisma
+RUN npm install -g nodemon
+
+
+EXPOSE 3002
+
+CMD ["nodemon", "index.js"]

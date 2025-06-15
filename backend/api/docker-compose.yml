@@ -1,0 +1,38 @@
+version: '3.8'
+
+services:
+  api-gateway:
+    build:
+      context: .
+      dockerfile: ./infra/Dockerfile.api-gateway
+    ports:
+      - '3000:3000'
+    environment:
+      - PORT=3000
+      # - AUTH_SERVICE_URL=http://auth-service:3001
+      - PROCESS_SERVICE_URL=http://process-service:3002
+    env_file:
+      - .env
+    depends_on:
+     # - auth-service
+      - process-service
+
+  # auth-service:
+  #   build:
+  #     context: ./auth-service
+  #     dockerfile: Dockerfile
+  #   ports:
+  #     - '3001:3001'
+  #   environment:
+  #     - PORT=3001
+
+  process-service:
+    build:
+      context: .
+      dockerfile: ./infra/Dockerfile.process-service
+    ports:
+      - '3002:3002'
+    environment:
+      - PORT=3002
+    env_file:
+      - .env
