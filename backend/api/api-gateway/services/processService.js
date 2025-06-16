@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const PROCESS_SERVICE_URL =  "http://process-service:3002" // 'http://localhost:3002';
+const PROCESS_SERVICE_URL =  "http://process-service:3002"
 
 export async function getProcesses({ params, dataInicial, dataFinal, token}) {
   return axios.get(`${PROCESS_SERVICE_URL}/process`,{

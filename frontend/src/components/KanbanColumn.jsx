@@ -1,8 +1,8 @@
-"use client"
+"use client";
 
-import React from "react"
-import { Card } from "./ui/card"
-import { Droppable } from "@hello-pangea/dnd"
+import React from "react";
+import { Card } from "./ui/card";
+import { Droppable } from "@hello-pangea/dnd";
 
 export function KanbanColumn({
   title,
@@ -17,7 +17,7 @@ export function KanbanColumn({
         <Card
           ref={provided.innerRef}
           {...provided.droppableProps}
-          className="w-[300px] p-4 space-y-2 min-h-[60vh] overflow-y-auto"
+          className="w-[500px] p-4 space-y-2 min-h-[60vh] overflow-y-auto bg-muted"
           onScroll={onScroll}
         >
           <div className="flex justify-between items-center font-medium">
@@ -31,5 +31,5 @@ export function KanbanColumn({
         </Card>
       )}
     </Droppable>
-  )
+  );
 }

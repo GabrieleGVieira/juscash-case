@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const AUTH_SERVICE_URL = "http://auth-service:3003"; // porta do auth-service
+const AUTH_SERVICE_URL = "http://auth-service:3003";
 
 export async function login(email, password) {
   return await axios.post(
