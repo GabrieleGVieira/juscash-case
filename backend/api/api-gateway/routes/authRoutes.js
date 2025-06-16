@@ -5,24 +5,28 @@ const router = express.Router();
 
 router.post("/login", async (req, res) => {
   try {
-    const email = req.body.email
-    const password = req.body.password
+    const email = req.body.email;
+    const password = req.body.password;
     const response = await login(email, password);
     res.json(response.data);
   } catch (err) {
-    res.status(err.response?.status || 500).json(err.response?.data || { error: "Erro no login" });
+    res
+      .status(err.response?.status || 500)
+      .json(err.response?.data || { error: "Erro no login" });
   }
 });
 
 router.post("/register", async (req, res) => {
   try {
-    const email = req.body.email
-    const fullName = req.body.fullName
-    const password = req.body.password
-    const response = await createUser({email, fullName, password});
+    const email = req.body.email;
+    const fullName = req.body.fullName;
+    const password = req.body.password;
+    const response = await createUser({ email, fullName, password });
     res.json(response.data);
   } catch (err) {
-    res.status(err.response?.status || 500).json(err.response?.data || { error: "Erro no registro" });
+    res
+      .status(err.response?.status || 500)
+      .json(err.response?.data || { error: "Erro no registro" });
   }
 });
 
