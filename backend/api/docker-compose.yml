@@ -9,22 +9,13 @@ services:
       - '3001:3001'
     environment:
       - PORT=3001
-      # - AUTH_SERVICE_URL=http://auth-service:3001
+      - AUTH_SERVICE_URL=http://auth-service:3003
       - PROCESS_SERVICE_URL=http://process-service:3002
     env_file:
       - .env
     depends_on:
-     # - auth-service
+      - auth-service
       - process-service
-
-  # auth-service:
-  #   build:
-  #     context: ./auth-service
-  #     dockerfile: Dockerfile
-  #   ports:
-  #     - '3001:3001'
-  #   environment:
-  #     - PORT=3001
 
   process-service:
     build:
@@ -34,5 +25,16 @@ services:
       - '3002:3002'
     environment:
       - PORT=3002
+    env_file:
+      - .env
+
+  auth-service:
+    build:
+      context: .
+      dockerfile: ./infra/Dockerfile.auth-service
+    ports:
+      - '3003:3003'
+    environment:
+      - PORT=3003
     env_file:
       - .env
