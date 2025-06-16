@@ -27,7 +27,9 @@ model Processo {
   valor_principal_bruto_liquido String?
   juros_moratorios              String?
   honorarios_adv                String?
-  status                String   @default("Nova") 
+  status                        String   @default("nova")
+  created_at                    DateTime @default(now())
+  updated_at                    DateTime @updatedAt @default(now()) 
 
   @@map("processo")
 }
