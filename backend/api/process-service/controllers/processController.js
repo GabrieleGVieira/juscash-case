@@ -7,7 +7,8 @@ export class ProcessController {
 
   get = async (req, res) => {
     try {
-      const processes = await this.service.getProcesses(req.query);
+      const {filters} = req.body
+      const processes = await this.service.getProcesses(filters);
       res.status(200).json(processes);
     } catch (error) {
       res.status(error.response?.status || 500).json({ error: error.message });
