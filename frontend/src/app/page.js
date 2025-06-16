@@ -1,7 +1,14 @@
+"use client";
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
+
 export default function Home() {
-  return (
-    <main className="p-6 space-y-6">
-      <h1 className="text-2xl font-bold">Hello World</h1>
-    </main>
-  )
+  const router = useRouter();
+
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    router.push(token ? "/kanban" : "/login");
+  }, []);
+
+  return <h1>Carregando...</h1>;
 }

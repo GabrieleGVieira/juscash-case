@@ -1,10 +1,10 @@
 "use client"
 import { useEffect, useState } from "react"
 import { DragDropContext } from "@hello-pangea/dnd"
-import { KanbanCard } from "../../components/KanbanCard"
-import { KanbanColumn } from "../../components/KanbanColumn"
-import { ProcessoDialog } from "../../components/ProcessoDialog"
-import { SearchFilter } from "../../components/SearchFilter"
+import { KanbanCard } from "../../../components/KanbanCard"
+import { KanbanColumn } from "../../../components/KanbanColumn"
+import { ProcessoDialog } from "../../../components/ProcessoDialog"
+import { SearchFilter } from "../../../components/SearchFilter"
 
 export default function Kanban() {
   const [processos, setProcessos] = useState([])
@@ -12,10 +12,12 @@ export default function Kanban() {
    async function fetchData(filtros) {
       try {
         const queryString = new URLSearchParams(filtros).toString();
+        const token = localStorage.getItem("token");
         const res = await fetch(`http://localhost:3001/api/process?${queryString}`, {
           method: "GET",
           headers: {
             "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`, 
           },
         });
 
@@ -30,8 +32,13 @@ export default function Kanban() {
     fetchData()
   }, [])
 
-  const porStatus = (status) =>
-    processos.filter((p) => p.status?.toLowerCase() === status.toLowerCase())
+  const porStatus = (status) => { 
+    if (!Array.isArray(processos)) {
+    return [] 
+  } else {
+      return processos.filter((p) => p.status?.toLowerCase() === status.toLowerCase())
+    }
+  }
 
   const formatarData = (data) => {
     const d = new Date(data)
@@ -58,10 +65,12 @@ const handleDragEnd = async (result) => {
   )
 
   try {
+    const token = localStorage.getItem("token");
     const response = await fetch(`http://localhost:3001/api/process/${movedProcess.hash_id}/status`, {
       method: "PATCH",
       headers: {
         "Content-Type": "application/json",
+        "Authorization": `Bearer ${token}`, 
       },
       body: JSON.stringify({ newStatus }),
     })
