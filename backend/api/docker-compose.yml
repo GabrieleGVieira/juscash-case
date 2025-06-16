@@ -6,9 +6,9 @@ services:
       context: .
       dockerfile: ./infra/Dockerfile.api-gateway
     ports:
-      - '3000:3000'
+      - '3001:3001'
     environment:
-      - PORT=3000
+      - PORT=3001
       # - AUTH_SERVICE_URL=http://auth-service:3001
       - PROCESS_SERVICE_URL=http://process-service:3002
     env_file:
