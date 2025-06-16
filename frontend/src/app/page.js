@@ -1,103 +1,161 @@
-import Image from "next/image";
+"use client"
+import { useEffect, useState } from "react"
+import { DragDropContext } from "@hello-pangea/dnd"
+import { KanbanCard } from "../components/KanbanCard"
+import { KanbanColumn } from "../components/KanbanColumn"
+import { ProcessoDialog } from "@/components/ProcessoDialog"
 
 export default function Home() {
-  return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm/6 text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-[family-name:var(--font-geist-mono)] font-semibold">
-              src/app/page.js
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
+  const [processos, setProcessos] = useState([])
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+  useEffect(() => {
+    async function fetchData() {
+      try {
+        const res = await fetch("http://localhost:3001/api/process")
+        const data = await res.json()
+        setProcessos(data)
+      } catch (error) {
+        console.error("Erro ao buscar processos:", error)
+      }
+    }
+    fetchData()
+  }, [])
+
+  const porStatus = (status) =>
+    processos.filter((p) => p.status?.toLowerCase() === status.toLowerCase())
+
+  const formatarData = (data) => {
+    const d = new Date(data)
+    return d.toLocaleDateString("pt-BR")
+  }
+
+const handleDragEnd = async (result) => {
+  const { source, destination, draggableId } = result
+
+  if (!destination) return
+  if (destination.droppableId === source.droppableId) return
+
+  const movedProcess = processos.find(p => String(p.id) === draggableId)
+  if (!movedProcess) return
+
+  const newStatus = destination.droppableId
+
+  // Backup do estado atual para possível rollback
+  const processosBackup = [...processos]
+
+  // Atualização otimista: atualiza localmente antes de chamar API
+  setProcessos(prev =>
+    prev.map(p =>
+      p.id === movedProcess.id ? { ...p, status: newStatus, updated_at: new Date().toISOString() } : p
+    )
+  )
+
+  try {
+    const response = await fetch(`http://localhost:3001/api/process/${movedProcess.hash_id}/status`, {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ newStatus }),
+    })
+
+    if (!response.ok) {
+      throw new Error("Erro ao atualizar status no backend")
+    }
+  } catch (error) {
+    console.error("Erro ao atualizar status:", error)
+    alert("Erro ao atualizar status no servidor. Movimentação revertida.")
+    setProcessos(processosBackup)
+  }
+}
+
+  return (
+    <main className="p-6 space-y-6">
+      <h1 className="text-2xl font-bold">📜 Publicações</h1>
+
+      <DragDropContext onDragEnd={handleDragEnd}>
+        <div className="flex gap-4 overflow-x-auto">
+          <KanbanColumn
+            title="Nova Publicação"
+            count={porStatus("nova").length}
+            droppableId="nova"
           >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+            {porStatus("nova").map((p, index) => (
+                <ProcessoDialog key={p.id} processo={p} trigger={
+                  <div className="cursor-pointer">
+                  <KanbanCard
+                    id={String(p.id)}
+                    index={index}
+                    processo={p.numero_processo}
+                    data={formatarData(p.data_disponibilizacao)}
+                    tempo={p.updated_at}
+                  />
+                  </div>
+                } />
+              ))}
+          </KanbanColumn>
+
+          <KanbanColumn
+            title="Publicação Lida"
+            count={porStatus("lida").length}
+            droppableId="lida"
           >
-            Read our docs
-          </a>
+            {porStatus("lida").map((p, index) => (
+              <ProcessoDialog key={p.id} processo={p} trigger={
+                  <div className="cursor-pointer">
+                  <KanbanCard
+                    id={String(p.id)}
+                    index={index}
+                    processo={p.numero_processo}
+                    data={formatarData(p.data_disponibilizacao)}
+                    tempo={p.updated_at}
+                  />
+                  </div>
+                } />
+            ))}
+          </KanbanColumn>
+
+          <KanbanColumn
+            title="Enviar para Advogado Responsável"
+            count={porStatus("em_analise").length}
+            droppableId="em_analise"
+          >
+            {porStatus("em_analise").map((p, index) => (
+                <ProcessoDialog key={p.id} processo={p} trigger={
+                  <div className="cursor-pointer">
+                  <KanbanCard
+                    id={String(p.id)}
+                    index={index}
+                    processo={p.numero_processo}
+                    data={formatarData(p.data_disponibilizacao)}
+                    tempo={p.updated_at}
+                  />
+                  </div>
+                } />
+            ))}
+          </KanbanColumn>
+
+          <KanbanColumn
+            title="Concluído"
+            count={porStatus("processada").length}
+            droppableId="processada"
+          >
+            {porStatus("processada").map((p, index) => (
+                <ProcessoDialog key={p.id} processo={p} trigger={
+                  <div className="cursor-pointer">
+                  <KanbanCard
+                    id={String(p.id)}
+                    index={index}
+                    processo={p.numero_processo}
+                    data={formatarData(p.data_disponibilizacao)}
+                    tempo={p.updated_at}
+                  />
+                  </div>
+                } />
+            ))}
+          </KanbanColumn>
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
-    </div>
-  );
+      </DragDropContext>
+    </main>
+  )
 }
