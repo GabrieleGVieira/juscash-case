@@ -33,3 +33,14 @@ model Processo {
 
   @@map("processo")
 }
+
+model Usuario {
+  id                            Int      @id @default(autoincrement())
+  user_email                    String   @unique
+  full_name                     String
+  hashed_password               String
+  created_at                    DateTime @default(now())
+  updated_at                    DateTime @updatedAt @default(now()) 
+
+  @@map("usuario")
+}
