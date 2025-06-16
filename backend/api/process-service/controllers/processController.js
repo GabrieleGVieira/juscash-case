@@ -20,7 +20,7 @@ export class ProcessController {
       const { hash_id } = req.params;
       const { newStatus } = req.body;
       await this.service.updateStatus(hash_id, newStatus);
-      res.status(200);
+      res.status(200).json("Atualizado com sucesso");
     } catch (error) {
       res.status(error.response?.status || 500).json({ error: error.message });
     }

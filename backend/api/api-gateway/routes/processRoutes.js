@@ -1,10 +1,10 @@
 import express from 'express';
 import { getProcesses, updateStatus} from '../services/processService.js';
-// import verifyToken from '../middlewares/verifyToken.js';
+import { verifyToken } from '../middleware/authMiddleware.js';
 
 const router = express.Router();
 
-router.get('/', async (req, res) => {
+router.get('/', verifyToken, async (req, res) => {
   try {
     const { params, dataInicial, dataFinal } = req.query;
     const response = await getProcesses({params, dataInicial, dataFinal});
@@ -14,7 +14,7 @@ router.get('/', async (req, res) => {
   }
 });
 
-router.patch('/:hash_id/status', async (req, res) => {
+router.patch('/:hash_id/status', verifyToken, async (req, res) => {
   try {
     const response = await updateStatus(req.params.hash_id, req.body.newStatus, req.token);
     res.json(response.data);
