@@ -9,7 +9,7 @@ export class AuthController {
     try {
       const { email, password } = req.body;
       const token = await this.service.login({email, password})
-      res.status(200).json("Usuário logado");
+      res.status(200).json(token);
     } catch (error) {
       res.status(error.status || 500).json({ error: error.message });
     }

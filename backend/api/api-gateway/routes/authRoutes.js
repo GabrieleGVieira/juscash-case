@@ -2,7 +2,6 @@ import express from "express";
 import { createUser, login } from "../services/authService.js";
 
 const router = express.Router();
-const AUTH_SERVICE_URL = "http://localhost:3003"; // porta do auth-service
 
 router.post("/login", async (req, res) => {
   try {
