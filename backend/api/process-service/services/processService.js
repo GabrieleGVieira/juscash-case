@@ -2,16 +2,15 @@ import prisma from '../../prisma/prismaClient.js';
 import normalize from "../../utils/normalize.js"
 
 export class ProcessService {
-async getProcesses(filters) {
-  console.log(filters)
-  if (!filters) {
+async getProcesses(params, data_inicial, data_final) {
+  if (!params && !data_final && !data_inicial) {
     return await prisma.processo.findMany();
   }
 
-  const normalizedFilter = normalize(filters.params || '');
+  const normalizedFilter = normalize(params || '');
   const filterParam = `%${normalizedFilter}%`;
 
-  const params = [filterParam, filterParam, filterParam, filterParam];
+  const paramsNormalizaed = [filterParam, filterParam, filterParam, filterParam];
   const whereParts  = [];
 
   whereParts.push(`
@@ -23,16 +22,16 @@ async getProcesses(filters) {
     )
   `);
 
-  if (filters.data_inicial && filters.data_final) {
-    params.push(new Date(filters.data_inicial));
-    params.push(new Date(filters.data_final));
-    whereParts.push(`data_disponibilizacao BETWEEN $${params.length - 1} AND $${params.length}`);
-  } else if (filters.data_inicial) {
-    params.push(new Date(filters.data_inicial));
-    whereParts.push(`data_disponibilizacao >= $${params.length}`);
-  } else if (filters.data_final) {
-    params.push(new Date(filters.data_final));
-    whereParts.push(`data_disponibilizacao <= $${params.length}`);
+  if (data_inicial && data_final) {
+    paramsNormalizaed.push(new Date(data_inicial));
+    paramsNormalizaed.push(new Date(data_final));
+    whereParts.push(`data_disponibilizacao BETWEEN $${paramsNormalizaed.length - 1} AND $${paramsNormalizaed.length}`);
+  } else if (data_inicial) {
+    paramsNormalizaed.push(new Date(data_inicial));
+    whereParts.push(`data_disponibilizacao >= $${paramsNormalizaed.length}`);
+  } else if (data_final) {
+    paramsNormalizaed.push(new Date(data_final));
+    whereParts.push(`data_disponibilizacao <= $${paramsNormalizaed.length}`);
   }
 
   const whereClause = whereParts.length > 0 ? `WHERE ${whereParts.join(' AND ')}` : '';
@@ -43,13 +42,13 @@ async getProcesses(filters) {
     ${whereClause};
   `;
 
-  const results = await prisma.$queryRawUnsafe(query, ...params);
+  const results = await prisma.$queryRawUnsafe(query, ...paramsNormalizaed);
 
   return results;
 }
 
 
-  async updateStatus(hash_id, newStatus) {
+async updateStatus(hash_id, newStatus) {
     const process = await prisma.processo.findUnique({ where: { hash_id: hash_id } });
     if (!process) throw new Error('Processo não encontrado');
 

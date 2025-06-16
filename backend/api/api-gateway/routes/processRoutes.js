@@ -6,7 +6,8 @@ const router = express.Router();
 
 router.get('/', async (req, res) => {
   try {
-    const response = await getProcesses(req.query, req.token);
+    const { params, dataInicial, dataFinal } = req.query;
+    const response = await getProcesses({params, dataInicial, dataFinal});
     res.json(response.data);
   } catch (error) {
     res.status(error.response?.status || 500).json({ error: error.message });

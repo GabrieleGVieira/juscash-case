@@ -8,6 +8,7 @@ RUN npm install
 
 COPY ../prisma ./prisma
 COPY ../process-service ./process-service
+COPY ../utils ./utils
 
 WORKDIR /app/process-service
 

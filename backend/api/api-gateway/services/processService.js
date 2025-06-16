@@ -2,11 +2,17 @@ import axios from 'axios';
 
 const PROCESS_SERVICE_URL =  "http://process-service:3002" // 'http://localhost:3002';
 
-export async function getProcesses(query) {
-  return axios.get(`${PROCESS_SERVICE_URL}/process`, {
+export async function getProcesses({ params, dataInicial, dataFinal }) {
+  console.log(params)
+  return axios.get(`${PROCESS_SERVICE_URL}/process`,{
+      params: {
+        params,
+        dataInicial,
+        dataFinal 
+      }
+    }
     // headers: { Authorization: `Bearer ${token}` },
-    params: query,
-  });
+  );
 }
 
 export async function updateStatus(hash_id, newStatus) {
