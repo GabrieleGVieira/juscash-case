@@ -1,5 +1,9 @@
 import express from "express";
 import authRoutes from "./routes/authRoutes.js";
+import setupSwagger from "../swagger/swagger.js";
+
+setupSwagger(app);
+
 
 const app = express();
 app.use(express.json());

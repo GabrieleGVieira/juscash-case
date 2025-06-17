@@ -1,5 +1,8 @@
 import express from "express";
 import processRoutes from "./routes/processRoutes.js";
+import setupSwagger from "../swagger/swagger.js";
+
+setupSwagger(app);
 
 const app = express();
 app.use(express.json());
